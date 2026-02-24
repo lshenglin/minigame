@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nut, Nut, Squirrel</title>
+  <style>
+    :root{
+      --bg:#fafafa; --card:#ffffff; --muted:#666; --text:#111;
+      --border:#e6e6e6; --shadow: 0 1px 10px rgba(0,0,0,.06);
+      --black:#111; --danger:#c01818;
+      --radius:18px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    body{ margin:0; background:var(--bg); color:var(--text); }
+    .wrap{ max-width:1100px; margin:0 auto; padding:18px; }
+    header{ display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
+    h1{ margin:0; font-size:34px; letter-spacing:-.02em; }
+    .subtitle{ color:var(--muted); margin-top:6px; }
+    .pills{ display:flex; gap:8px; flex-wrap:wrap; }
+    .pill{
+      display:inline-flex; gap:6px; align-items:center;
+      padding:6px 10px; border:1px solid var(--border); background:var(--card);
+      border-radius:999px; box-shadow: var(--shadow); font-size:13px;
+    }
+    .pill b{ font-variant-numeric: tabular-nums; }
+    .grid{ display:grid; grid-template-columns: 1.8fr 1fr; gap:14px; margin-top:16px; }
+    @media (max-width: 920px){ .grid{ grid-template-columns:1fr; } }
+
+    .panel{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow: var(--shadow); padding:16px;
+    }
+    .panel h2{ margin:0; font-size:14px; color:#222; }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .row.space{ justify-content:space-between; }
+    .btn{
+      border-radius:14px; padding:10px 14px; font-weight:700; border:1px solid var(--border);
+      background:#fff; cursor:pointer; transition: transform .03s ease, background .12s ease;
+      user-select:none;
+    }
+    .btn:active{ transform: scale(.99); }
+    .btn.primary{ background:var(--black); border-color:var(--black); color:#fff; }
+    .btn:hover{ background:#f6f6f6; }
+    .btn.primary:hover{ background:#222; }
+    .btn.danger{ color:var(--danger); border-color:#f0caca; }
+    .btn.danger:hover{ background:#fff1f1; }
+    .btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+    .muted{ color:var(--muted); }
+    .big{ font-size:20px; font-weight:900; }
+    .turnTag{
+      font-size:11px; font-weight:900; padding:3px 8px; border-radius:999px;
+      background:var(--black); color:#fff; margin-left:8px;
+    }
+
+    .cardBox{ display:flex; align-items:center; justify-content:center; min-height:260px; }
+    .card{
+      width:160px; height:220px; border-radius:24px; border:1px solid var(--border);
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      box-shadow: var(--shadow); user-select:none;
+    }
+    .card.nut{ background:#fff8e6; border-color:#f0ddaa; }
+    .card.squirrel{ background:#ecfff2; border-color:#bfe9cc; }
+    .emoji{ font-size:64px; margin-bottom:10px; }
+    .cardLabel{ font-size:18px; font-weight:900; letter-spacing:.08em; }
+
+    .stashList{ margin-top:10px; display:grid; gap:8px; }
+    .stashItem{
+      border:1px solid var(--border); border-radius:14px; padding:10px 12px;
+      display:flex; justify-content:space-between; align-items:center; background:#fff;
+    }
+    .stashItem.active{ border-color:#111; }
+    .stashItem .name{ font-weight:800; }
+    .stashItem .score{ font-weight:900; font-variant-numeric: tabular-nums; }
+
+    .twoCol{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+    @media (max-width: 560px){ .twoCol{ grid-template-columns:1fr; } }
+
+    .soft{ background:#f6f6f6; border:1px solid var(--border); border-radius:18px; padding:12px; }
+    .stat{ display:flex; justify-content:space-between; gap:10px; margin-top:8px; font-size:13px; }
+    .stat span:last-child{ font-weight:900; font-variant-numeric: tabular-nums; }
+    .toggle{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; }
+    input[type="checkbox"]{ width:18px; height:18px; }
+
+    .log{ margin-top:10px; max-height:240px; overflow:auto; display:flex; flex-direction:column; gap:8px; }
+    .logItem{ font-size:13px; }
+    .logItem .t{ color:var(--muted); }
+    .logItem b{ font-weight:900; }
+
+    label{ font-size:13px; color:#333; }
+    select, input[type="number"]{
+      width:100%; padding:9px 10px; border-radius:12px; border:1px solid var(--border);
+      font-size:14px; background:#fff;
+    }
+    .formGrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+    .cpuLines{ margin-top:10px; display:grid; gap:8px; }
+    .cpuLine{ display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:center; }
+    .small{ font-size:12px; color:var(--muted); line-height:1.35; }
+    footer{ margin-top:18px; font-size:12px; color:var(--muted); }
+    .winner{
+      margin-top:10px; border:1px solid var(--border); border-radius:18px; padding:12px; background:#fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Nut, Nut, Squirrel</h1>
+        <div class="subtitle">A push-your-luck card game — pure HTML/JS edition.</div>
+      </div>
+      <div class="pills">
+        <div class="pill">Center: <b id="pillCenter">60</b></div>
+        <div class="pill">Discard: <b id="pillDiscard">0</b></div>
+        <div class="pill">Drawn 🥜: <b id="pillDrawnNuts">0</b></div>
+        <div class="pill">Drawn 🐿️: <b id="pillDrawnSquirrels">0</b></div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Game -->
+      <section>
+        <div class="panel">
+          <div class="row space">
+            <div>
+              <div class="muted" style="font-size:13px;">Current turn</div>
+              <div class="big" id="curPlayer">—</div>
+              <div class="muted" style="margin-top:4px;font-size:13px;">
+                Nuts in hand this turn: <b id="handNuts" style="font-variant-numeric:tabular-nums;">0</b>
+              </div>
+            </div>
+            <div class="row">
+              <button class="btn primary" id="btnDraw">Draw</button>
+              <button class="btn" id="btnStash">Stash &amp; End Turn</button>
+              <button class="btn danger" id="btnEnd">End Game</button>
+              <button class="btn primary" id="btnStart">Start</button>
+            </div>
+          </div>
+
+          <div class="twoCol">
+            <div class="cardBox" id="cardBox">
+              <div class="muted">Draw a card to reveal it.</div>
+            </div>
+
+            <div class="soft">
+              <h2>Player stashes</h2>
+              <div class="stashList" id="stashList"></div>
+              <div id="winnerBox"></div>
+            </div>
+          </div>
+
+          <div class="muted" style="margin-top:12px;font-size:13px;">
+            <b>Rules:</b> Draw from center. NUT stays in hand. SQUIRREL discards the squirrel card and all nuts in hand, ending your turn.
+            After a NUT, you may stop to stash all nuts in hand (safe) and end your turn.
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:14px;">
+          <div class="row space">
+            <h2>Game log</h2>
+            <button class="btn" id="btnClearLog">Clear</button>
+          </div>
+          <div class="log" id="log"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Setup + Monitors -->
+      <aside class="space-y">
+        <div class="panel">
+          <h2>Game setup</h2>
+
+          <div class="formGrid">
+            <div>
+              <label>Human players</label>
+              <input id="inpHumans" type="number" min="0" max="4" value="1" />
+            </div>
+            <div>
+              <label>CPU players</label>
+              <input id="inpCPUs" type="number" min="0" max="4" value="1" />
+            </div>
+          </div>
+
+          <div class="cpuLines" id="cpuLines"></div>
+          <div class="small">Wild=stop@5, Wimpy=stop@3, Cool=stop@4, Math=stop when risk &gt; gain.</div>
+
+          <div class="row" style="margin-top:10px;">
+            <button class="btn primary" id="btnRestart">Restart</button>
+            <button class="btn" id="btnDefaults">Defaults</button>
+          </div>
+
+          <div class="small" id="setupNote" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Monitors</h2>
+
+          <div class="toggle">
+            <span style="font-size:13px;color:#333;">Probability monitor</span>
+            <input type="checkbox" id="chkProb" checked />
+          </div>
+          <div class="toggle">
+            <span style="font-size:13px;color:#333;">Gain vs risk monitor</span>
+            <input type="checkbox" id="chkGainRisk" checked />
+          </div>
+
+          <div style="margin-top:12px; display:grid; gap:10px;">
+            <div class="soft" id="probPanel">
+              <h2>Probability of next draw</h2>
+              <div class="stat"><span>P(NUT)</span><span id="pNut">—</span></div>
+              <div class="stat"><span>P(SQUIRREL)</span><span id="pSquirrel">—</span></div>
+              <div class="small" style="margin-top:8px;">Based on remaining cards in center pile.</div>
+            </div>
+
+            <div class="soft" id="gainRiskPanel">
+              <h2>Gain vs risk (this turn)</h2>
+              <div class="stat"><span>Gain = P(NUT)</span><span id="gain">—</span></div>
+              <div class="stat"><span id="riskLabel">Risk = P(SQUIRREL) × nuts-in-hand (0)</span><span id="risk">—</span></div>
+              <div class="small" style="margin-top:8px;">Matches your definition (risk scales with nuts you could lose).</div>
+            </div>
+
+            <div class="soft">
+              <h2>Center pile tracker</h2>
+              <div class="stat"><span>Remaining cards</span><span id="remCards">—</span></div>
+              <div class="stat"><span>Remaining 🥜</span><span id="remNuts">—</span></div>
+              <div class="stat"><span>Remaining 🐿️</span><span id="remSquirrels">—</span></div>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          Deck: 45 nuts + 15 squirrels. Players: 2–4. CPU turns auto-play.
+        </footer>
+      </aside>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ===== Spec constants =====
+  const TOTAL_CARDS = 60;
+  const NUTS_TOTAL = 45;
+  const SQUIRRELS_TOTAL = 15;
+
+  // ===== CPU personalities =====
+  const CPU = {
+    wild: { id:"wild", name:"Wild Isaac", decide: ({nutsInHand}) => nutsInHand >= 5 },
+    wimpy:{ id:"wimpy", name:"Wimpy Isaac", decide: ({nutsInHand}) => nutsInHand >= 3 },
+    cool: { id:"cool", name:"Cool Isaac", decide: ({nutsInHand}) => nutsInHand >= 4 },
+    math: { id:"math", name:"Math Champion Isaac", decide: ({gain, risk}) => risk > gain },
+  };
+
+  // ===== DOM =====
+  const $ = (id) => document.getElementById(id);
+
+  const btnDraw = $("btnDraw");
+  const btnStash = $("btnStash");
+  const btnEnd = $("btnEnd");
+  const btnStart = $("btnStart");
+  const btnRestart = $("btnRestart");
+  const btnDefaults = $("btnDefaults");
+  const btnClearLog = $("btnClearLog");
+
+  const inpHumans = $("inpHumans");
+  const inpCPUs = $("inpCPUs");
+  const cpuLines = $("cpuLines");
+  const setupNote = $("setupNote");
+
+  const chkProb = $("chkProb");
+  const chkGainRisk = $("chkGainRisk");
+  const probPanel = $("probPanel");
+  const gainRiskPanel = $("gainRiskPanel");
+
+  // Pill trackers
+  const pillCenter = $("pillCenter");
+  const pillDiscard = $("pillDiscard");
+  const pillDrawnNuts = $("pillDrawnNuts");
+  const pillDrawnSquirrels = $("pillDrawnSquirrels");
+
+  // Main UI
+  const curPlayer = $("curPlayer");
+  const handNutsEl = $("handNuts");
+  const cardBox = $("cardBox");
+  const stashList = $("stashList");
+  const winnerBox = $("winnerBox");
+  const logEl = $("log");
+
+  // Monitors
+  const pNutEl = $("pNut");
+  const pSquirrelEl = $("pSquirrel");
+  const gainEl = $("gain");
+  const riskEl = $("risk");
+  const riskLabel = $("riskLabel");
+  const remCards = $("remCards");
+  const remNuts = $("remNuts");
+  const remSquirrels = $("remSquirrels");
+
+  // ===== Helpers =====
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const nowStamp = () => {
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2,"0");
+    const mm = String(d.getMinutes()).padStart(2,"0");
+    const ss = String(d.getSeconds()).padStart(2,"0");
+    return `${hh}:${mm}:${ss}`;
+  };
+  const fmtPct = (x) => {
+    if (!Number.isFinite(x)) return "—";
+    return (Math.round(x * 1000) / 10).toFixed(1) + "%";
+  };
+  const shuffle = (arr) => {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+
+  function buildDeck(){
+    const deck = [];
+    for (let i=0;i<NUTS_TOTAL;i++) deck.push("NUT");
+    for (let i=0;i<SQUIRRELS_TOTAL;i++) deck.push("SQUIRREL");
+    return shuffle(deck);
+  }
+
+  function countInDeck(deck, type){
+    let c = 0;
+    for (const x of deck) if (x === type) c++;
+    return c;
+  }
+
+  function computeProbs(remainingNuts, remainingSquirrels){
+    const remaining = remainingNuts + remainingSquirrels;
+    if (remaining <= 0) return { pNut:0, pSquirrel:0 };
+    return { pNut: remainingNuts/remaining, pSquirrel: remainingSquirrels/remaining };
+  }
+
+  // Per your monitor definition:
+  // gain = P(NUT)
+  // risk = P(SQUIRREL) * nutsInHand
+  function computeGainRisk(pNut, pSquirrel, nutsInHand){
+    return { gain: pNut, risk: pSquirrel * nutsInHand };
+  }
+
+  // ===== Game state =====
+  const state = {
+    status: "setup", // setup | playing | ended
+    players: [],
+    deck: [],
+    discard: [],
+    turnIndex: 0,
+    handNuts: 0,
+    lastCard: null,
+    log: [],
+    cpuTimer: null,
+    cpuPersonalityIds: ["cool","wimpy","wild","math"],
+  };
+
+  function addLog(player, text){
+    state.log.unshift({ time: nowStamp(), player, text });
+    state.log = state.log.slice(0, 80);
+    renderLog();
+  }
+
+  function renderLog(){
+    logEl.innerHTML = "";
+    if (state.log.length === 0){
+      const div = document.createElement("div");
+      div.className = "muted";
+      div.style.fontSize = "13px";
+      div.textContent = "No events yet.";
+      logEl.appendChild(div);
+      return;
+    }
+    for (const item of state.log){
+      const div = document.createElement("div");
+      div.className = "logItem";
+      div.innerHTML = `<span class="t">${item.time}</span> <span class="muted">•</span> <b>${escapeHtml(item.player)}</b> <span class="muted">—</span> ${escapeHtml(item.text)}`;
+      logEl.appendChild(div);
+    }
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll("\"","&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function makePlayers(humans, cpus, cpuIds){
+    const players = [];
+    for (let i=0;i<humans;i++){
+      players.push({ id:`H${i+1}`, name:`Human ${i+1}`, isCPU:false, cpu:null, stash:0 });
+    }
+    for (let j=0;j<cpus;j++){
+      const pid = cpuIds[j] || "cool";
+      const pname = CPU[pid]?.name || CPU.cool.name;
+      players.push({ id:`C${j+1}`, name:`CPU ${j+1} (${pname})`, isCPU:true, cpu:pid, stash:0 });
+    }
+    return players;
+  }
+
+  function applyConfigNormalize(){
+    let humans = clamp(parseInt(inpHumans.value || "0", 10), 0, 4);
+    let cpus = clamp(parseInt(inpCPUs.value || "0", 10), 0, 4);
+
+    // total clamped 2..4, prefer keep humans
+    if (humans + cpus > 4){
+      cpus = Math.max(0, 4 - humans);
+      if (humans + cpus > 4) humans = 4 - cpus;
+    }
+    if (humans + cpus < 2){
+      humans = 2; cpus = 0;
+    }
+
+    inpHumans.value = humans;
+    inpCPUs.value = cpus;
+
+    // CPU personality selectors
+    renderCpuSelectors(cpus);
+
+    return { humans, cpus };
+  }
+
+  function renderCpuSelectors(cpus){
+    cpuLines.innerHTML = "";
+    for (let i=0;i<cpus;i++){
+      const line = document.createElement("div");
+      line.className = "cpuLine";
+
+      const label = document.createElement("div");
+      label.className = "small";
+      label.style.fontWeight = "800";
+      label.style.color = "#222";
+      label.textContent = `CPU ${i+1}`;
+
+      const sel = document.createElement("select");
+      sel.disabled = (state.status === "playing");
+      sel.dataset.idx = String(i);
+      const current = state.cpuPersonalityIds[i] || "cool";
+      for (const key of Object.keys(CPU)){
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = CPU[key].name;
+        if (key === current) opt.selected = true;
+        sel.appendChild(opt);
+      }
+      sel.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        state.cpuPersonalityIds[idx] = e.target.value;
+      });
+
+      line.appendChild(label);
+      line.appendChild(sel);
+      cpuLines.appendChild(line);
+    }
+  }
+
+  function resetGame(){
+    const { humans, cpus } = applyConfigNormalize();
+    const cpuIds = state.cpuPersonalityIds.slice(0, cpus);
+    while (cpuIds.length < cpus) cpuIds.push("cool");
+
+    state.players = makePlayers(humans, cpus, cpuIds);
+    state.deck = buildDeck();
+    state.discard = [];
+    state.turnIndex = 0;
+    state.handNuts = 0;
+    state.lastCard = null;
+    state.status = "playing";
+    state.log = [];
+
+    addLog("System", "New game started.");
+    renderAll();
+    scheduleCpuIfNeeded();
+  }
+
+  function endGame(manual=false){
+    state.status = "ended";
+    addLog("System", manual ? "Game ended manually." : "Deck is empty. Game ended.");
+    renderAll();
+    clearCpuTimer();
+  }
+
+  function clearCpuTimer(){
+    if (state.cpuTimer){
+      clearTimeout(state.cpuTimer);
+      state.cpuTimer = null;
+    }
+  }
+
+  function currentPlayer(){
+    return state.players[state.turnIndex];
+  }
+
+  function endTurnAdvance(){
+    state.handNuts = 0;
+    state.lastCard = null;
+    state.turnIndex = (state.turnIndex + 1) % state.players.length;
+    renderAll();
+    scheduleCpuIfNeeded();
+  }
+
+  function stashAndEndTurn(){
+    if (state.status !== "playing") return;
+    const p = currentPlayer();
+    if (state.handNuts > 0){
+      p.stash += state.handNuts;
+      addLog(p.name, `Stashed ${state.handNuts} nut(s).`);
+    } else {
+      addLog(p.name, "Ended turn with 0 nuts in hand.");
+    }
+    endTurnAdvance();
+  }
+
+  function drawCard(){
+    if (state.status !== "playing") return;
+    if (state.deck.length <= 0) return;
+
+    const p = currentPlayer();
+    const card = state.deck.pop();
+    state.lastCard = card;
+
+    if (card === "NUT"){
+      state.handNuts += 1;
+      state.discard.push("NUT");
+      addLog(p.name, "Drew a NUT. (kept in hand)");
+      renderAll();
+      scheduleCpuIfNeeded(); // CPU may decide to continue/stop
+    } else {
+      // SQUIRREL: discard squirrel + all nuts in hand and end turn
+      const nutsToDiscard = state.handNuts;
+      state.discard.push("SQUIRREL");
+      for (let i=0;i<nutsToDiscard;i++) state.discard.push("NUT");
+      state.handNuts = 0;
+      addLog(p.name, `Drew a SQUIRREL! Discarded squirrel + ${nutsToDiscard} nut(s) from hand. Turn ended.`);
+      // If last card was drawn, game ends after resolution (no next turn)
+      if (state.deck.length === 0){
+        renderAll();
+        endGame(false);
+      } else {
+        endTurnAdvance();
+      }
+      return;
+    }
+
+    // If we drew the last card and it was a NUT, the game ends immediately after draw.
+    if (state.deck.length === 0){
+      renderAll();
+      endGame(false);
+    }
+  }
+
+  function scheduleCpuIfNeeded(){
+    clearCpuTimer();
+    if (state.status !== "playing") return;
+    if (state.deck.length <= 0) return;
+
+    const p = currentPlayer();
+    if (!p || !p.isCPU) return;
+
+    // CPU delays a bit so you can see updates
+    state.cpuTimer = setTimeout(() => {
+      if (state.status !== "playing") return;
+      if (state.deck.length <= 0) return;
+
+      // CPU can only stop after at least one nut in hand (same as UI logic)
+      if (state.handNuts === 0){
+        drawCard();
+        return;
+      }
+
+      const remainingNuts = countInDeck(state.deck, "NUT");
+      const remainingSquirrels = countInDeck(state.deck, "SQUIRREL");
+      const { pNut, pSquirrel } = computeProbs(remainingNuts, remainingSquirrels);
+      const { gain, risk } = computeGainRisk(pNut, pSquirrel, state.handNuts);
+
+      const personality = CPU[p.cpu] || CPU.cool;
+      const shouldStop = personality.decide({ nutsInHand: state.handNuts, gain, risk });
+
+      if (shouldStop) stashAndEndTurn();
+      else drawCard();
+    }, 550);
+  }
+
+  function computeWinners(){
+    let best = -1;
+    for (const p of state.players) best = Math.max(best, p.stash);
+    const winners = state.players.filter(p => p.stash === best);
+    return { best, winners };
+  }
+
+  // ===== Rendering =====
+  function renderAll(){
+    // Setup lock note
+    const locked = (state.status === "playing");
+    inpHumans.disabled = locked;
+    inpCPUs.disabled = locked;
+    setupNote.textContent = locked ? "Setup is locked during a game. End or restart to change player counts." : "";
+
+    // Buttons
+    btnStart.style.display = (state.status === "setup") ? "" : "none";
+    btnRestart.disabled = (state.status === "playing"); // use End/Restart? we'll allow restart only when not playing
+    // But keep restart usable in setup/ended:
+    btnRestart.disabled = (state.status === "playing");
+
+    const p = currentPlayer();
+    const humanTurn = (state.status === "playing" && p && !p.isCPU);
+
+    btnDraw.disabled = !humanTurn || state.deck.length === 0;
+    btnStash.disabled = !humanTurn || state.deck.length === 0 || state.handNuts === 0;
+    btnEnd.disabled = (state.status !== "playing");
+
+    // Current player label
+    curPlayer.textContent = (state.status === "playing") ? p.name : "—";
+    handNutsEl.textContent = String(state.handNuts);
+
+    // Card display
+    cardBox.innerHTML = "";
+    if (!state.lastCard){
+      const div = document.createElement("div");
+      div.className = "muted";
+      div.textContent = "Draw a card to reveal it.";
+      cardBox.appendChild(div);
+    } else {
+      const c = document.createElement("div");
+      c.className = "card " + (state.lastCard === "NUT" ? "nut" : "squirrel");
+      const emoji = document.createElement("div");
+      emoji.className = "emoji";
+      emoji.textContent = (state.lastCard === "NUT" ? "🥜" : "🐿️");
+      const label = document.createElement("div");
+      label.className = "cardLabel";
+      label.textContent = state.lastCard;
+      c.appendChild(emoji);
+      c.appendChild(label);
+      cardBox.appendChild(c);
+    }
+
+    // Player stash list
+    stashList.innerHTML = "";
+    for (let i=0;i<state.players.length;i++){
+      const pl = state.players[i];
+      const item = document.createElement("div");
+      item.className = "stashItem" + ((state.status==="playing" && i===state.turnIndex) ? " active" : "");
+      const left = document.createElement("div");
+      left.className = "name";
+      left.textContent = pl.name;
+      if (state.status==="playing" && i===state.turnIndex){
+        const tag = document.createElement("span");
+        tag.className = "turnTag";
+        tag.textContent = "TURN";
+        left.appendChild(tag);
+      }
+      const right = document.createElement("div");
+      right.className = "score";
+      right.textContent = `${pl.stash} 🥜`;
+      item.appendChild(left);
+      item.appendChild(right);
+      stashList.appendChild(item);
+    }
+
+    // Winner box
+    winnerBox.innerHTML = "";
+    if (state.status === "ended"){
+      const { best, winners } = computeWinners();
+      const div = document.createElement("div");
+      div.className = "winner";
+      const title = document.createElement("div");
+      title.className = "muted";
+      title.style.fontSize = "13px";
+      title.textContent = "Winner";
+      const name = document.createElement("div");
+      name.style.fontSize = "18px";
+      name.style.fontWeight = "900";
+      name.textContent = winners.map(w => w.name).join(", ");
+      const score = document.createElement("div");
+      score.className = "muted";
+      score.style.marginTop = "4px";
+      score.textContent = `Score: ${best} 🥜`;
+      div.appendChild(title);
+      div.appendChild(name);
+      div.appendChild(score);
+      winnerBox.appendChild(div);
+    }
+
+    // Pills + counts
+    pillCenter.textContent = String(state.deck.length);
+    pillDiscard.textContent = String(state.discard.length);
+    pillDrawnNuts.textContent = String(state.discard.filter(x => x==="NUT").length);
+    pillDrawnSquirrels.textContent = String(state.discard.filter(x => x==="SQUIRREL").length);
+
+    // Monitors
+    probPanel.style.display = chkProb.checked ? "" : "none";
+    gainRiskPanel.style.display = chkGainRisk.checked ? "" : "none";
+
+    const remainingNuts = countInDeck(state.deck, "NUT");
+    const remainingSquirrels = countInDeck(state.deck, "SQUIRREL");
+    const { pNut, pSquirrel } = computeProbs(remainingNuts, remainingSquirrels);
+    const { gain, risk } = computeGainRisk(pNut, pSquirrel, state.handNuts);
+
+    pNutEl.textContent = fmtPct(pNut);
+    pSquirrelEl.textContent = fmtPct(pSquirrel);
+    gainEl.textContent = fmtPct(gain);
+    riskEl.textContent = fmtPct(risk);
+    riskLabel.textContent = `Risk = P(SQUIRREL) × nuts-in-hand (${state.handNuts})`;
+
+    remCards.textContent = String(state.deck.length);
+    remNuts.textContent = String(remainingNuts);
+    remSquirrels.textContent = String(remainingSquirrels);
+
+    // CPU selectors lock
+    const selects = cpuLines.querySelectorAll("select");
+    selects.forEach(sel => sel.disabled = (state.status === "playing"));
+  }
+
+  // ===== Events =====
+  btnStart.addEventListener("click", () => resetGame());
+  btnRestart.addEventListener("click", () => {
+    // Restart allowed when not actively playing to avoid confusion; end game first if needed
+    if (state.status === "playing") return;
+    resetGame();
+  });
+  btnDefaults.addEventListener("click", () => {
+    inpHumans.value = 1;
+    inpCPUs.value = 1;
+    state.cpuPersonalityIds = ["cool","wimpy","wild","math"];
+    applyConfigNormalize();
+    renderAll();
+  });
+
+  btnDraw.addEventListener("click", () => drawCard());
+  btnStash.addEventListener("click", () => stashAndEndTurn());
+  btnEnd.addEventListener("click", () => endGame(true));
+
+  btnClearLog.addEventListener("click", () => {
+    state.log = [];
+    renderLog();
+  });
+
+  inpHumans.addEventListener("input", () => {
+    if (state.status === "playing") return;
+    applyConfigNormalize();
+    renderAll();
+  });
+  inpCPUs.addEventListener("input", () => {
+    if (state.status === "playing") return;
+    applyConfigNormalize();
+    renderAll();
+  });
+
+  chkProb.addEventListener("change", renderAll);
+  chkGainRisk.addEventListener("change", renderAll);
+
+  // ===== Init =====
+  applyConfigNormalize();
+  state.players = makePlayers(1,1,["cool"]);
+  state.deck = buildDeck();
+  state.discard = [];
+  renderLog();
+  renderAll();
+})();
+</script>
+</body>
+</html>

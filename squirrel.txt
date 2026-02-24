@@ -1,0 +1,26 @@
+game name
+Nut, Nut, Squirrel
+Objective
+Collect most "nut" cards when all cards are drawn.
+Setup
+60 cards (45 "nut" cards + 15 "squirrel" cards), shuffled and place in center pile.
+2+ players (up to 4)
+How to Play
+1. Players take turns drawing one card from the center pile.
+2. If they draw a Nut card, keep in hand. If they draw a squirrel card, they put squirrel card and all nut cards in hand to discard pile and they end their turn.
+3. After drawing a Nut card, player can decide if they draw another card from center pile. If they don't, move all "nut" cards in hand to thier stash (these cards are safe), and they end thier turn. If they do draw another card, do step 2.
+Winning the Game
+Game ends when the last card in center pile is drawn. Each player counts the Nut cards in thier stash and the player has the most nut cards win.
+Web based game features
+1. options to choose number of human player and CPU player (total up to 4)
+2. track the number of nut and squirrel cards drawn and in the center pile.
+3. option to turn on/off a monitor that calculates the probability of drawing a squirrel card.
+4. option to turn on/off a monitor that calculates the gain vs. risk of drawing a card (gain is probability of drawing a nut card, risk is probability of drawing a squirrel card times nut cards in hand )
+5. CPU play can be from a list of different personalities(strategy of when to stop drawing cards):
+	a. wild Isaac: chooses to stop drawing cards after 5 cards in a turn
+	b. wimpy Isaac: chooses to stop drawing cards after 3 cards in a turn
+	c. cool Isaac: chooses to stop drawing cards after 4 cards in a turn
+	d. Math champion Isaac: chooses to stop drawing cards when risk is higher than gain.
+
+
+
