@@ -276,6 +276,7 @@
               <h2>Player stashes</h2>
               <div class="stashList" id="stashList"></div>
               <div id="winnerBox"></div>
+			  <div id="statsBox"></div>
             </div>
           </div>
 
@@ -329,7 +330,7 @@
           </div>
 
           <div class="cpuLines" id="cpuLines"></div>
-          <div class="small">Wild=stop@5, Wimpy=stop@3, Cool=stop@4, Math=stop when risk &gt; gain.</div>
+          <div class="small">Wild=stop@5, Wimpy=stop@3, Cool=stop@4, Dad=stop when risk &gt; gain.</div>
 
           <div class="row" style="margin-top:10px;">
             <button class="btn primary" id="btnRestart">Restart</button>
@@ -392,7 +393,7 @@
     wild: { id:"wild", name:"Wild Isaac", decide: ({nutsInHand}) => nutsInHand >= 5 },
     wimpy:{ id:"wimpy", name:"Wimpy Isaac", decide: ({nutsInHand}) => nutsInHand >= 3 },
     cool: { id:"cool", name:"Cool Isaac", decide: ({nutsInHand}) => nutsInHand >= 4 },
-    math: { id:"math", name:"Math Champion Isaac", decide: ({gain, risk}) => risk > gain },
+    math: { id:"math", name:"Isaac's dad", decide: ({gain, risk}) => risk > gain },
   };
 
   const $ = (id) => document.getElementById(id);
@@ -428,6 +429,7 @@
   const cardBox = $("cardBox");
   const stashList = $("stashList");
   const winnerBox = $("winnerBox");
+  const statsBox = $("statsBox");
   const logEl = $("log");
 
   const pNutEl = $("pNut");
@@ -480,7 +482,15 @@
     for (const x of deck) if (x === type) c++;
     return c;
   }
-
+	
+  function decisionMetrics(){
+    const remainingNuts = countInDeck(state.deck, "NUT");
+    const remainingSquirrels = countInDeck(state.deck, "SQUIRREL");
+    const { pNut, pSquirrel } = computeProbs(remainingNuts, remainingSquirrels);
+    const { gain, risk } = computeGainRisk(pNut, pSquirrel, state.handNuts);
+    return { gain, risk };
+  }
+  
   function computeProbs(remainingNuts, remainingSquirrels){
     const remaining = remainingNuts + remainingSquirrels;
     if (remaining <= 0) return { pNut:0, pSquirrel:0 };
@@ -509,7 +519,7 @@
     log: [],
     cpuTimer: null,
     cpuPersonalityIds: ["cool","wimpy","wild","math"],
-    cpuDelayMs: 1500,
+    cpuDelayMs: 1000,
     animLock: false,
   };
 
@@ -540,12 +550,18 @@
   function makePlayers(humans, cpus, cpuIds){
     const players = [];
     for (let i=0;i<humans;i++){
-      players.push({ id:`H${i+1}`, name:`Human ${i+1}`, isCPU:false, cpu:null, stash:0 });
+      players.push({
+		  id:`H${i+1}`, name:`Human ${i+1}`, isCPU:false, cpu:null, stash:0,
+		  stats: { perfectStash:0, safeStash:0, riskyDraw:0, riskyDrawNut:0 }
+		});
     }
     for (let j=0;j<cpus;j++){
       const pid = cpuIds[j] || "cool";
       const pname = CPU[pid]?.name || CPU.cool.name;
-      players.push({ id:`C${j+1}`, name:`CPU ${j+1} (${pname})`, isCPU:true, cpu:pid, stash:0 });
+      players.push({
+		  id:`C${j+1}`, name:`CPU ${j+1} (${pname})`, isCPU:true, cpu:pid, stash:0,
+		  stats: { perfectStash:0, safeStash:0, riskyDraw:0, riskyDrawNut:0 }
+		});
     }
     return players;
   }
@@ -655,6 +671,13 @@
     if (state.animLock) return;
 
     const p = currentPlayer();
+
+	if (state.handNuts > 0) {
+	  const { gain, risk } = decisionMetrics();
+	  if (risk > gain) p.stats.perfectStash += 1;
+	  else p.stats.safeStash += 1;
+	}
+	
     if (state.handNuts > 0){
       p.stash += state.handNuts;
       addLog(p.name, `Stashed ${state.handNuts} nut(s).`);
@@ -715,6 +738,16 @@
 
 	  try {
 		const p = currentPlayer();
+		let isRiskyDecisionDraw = false;
+
+		// Only count “choosing draw” when player has a choice (handNuts > 0)
+		if (state.handNuts > 0) {
+		  const { gain, risk } = decisionMetrics();
+		  if (risk > gain) {
+			p.stats.riskyDraw += 1;
+			isRiskyDecisionDraw = true;
+		  }
+		}
 		const card = state.deck.pop();
 		state.lastCard = card;
 
@@ -722,6 +755,10 @@
 		const toEl = (card === "NUT") ? handCards : discardPile;
 
 		await animateFlyCard(card, deckPile, toEl, dur);
+		
+		if (isRiskyDecisionDraw && card === "NUT") {
+		  p.stats.riskyDrawNut += 1;
+		}
 
 		if (card === "NUT"){
 		  state.handNuts += 1;
@@ -766,6 +803,49 @@
 	  }
 	}
 
+  function renderLiveStats(){
+    if (!statsBox) return;
+    statsBox.innerHTML = "";
+
+    // Show during playing AND ended (so user can see anytime)
+    if (state.status !== "playing" && state.status !== "ended") return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "winner"; // reuse styling
+
+    const title = document.createElement("div");
+    title.className = "muted";
+    title.style.fontSize = "13px";
+    title.textContent = "Decision statistics (live)";
+    wrap.appendChild(title);
+
+    const table = document.createElement("div");
+    table.style.marginTop = "8px";
+    table.style.display = "grid";
+    table.style.gap = "8px";
+
+    for (const pl of state.players){
+      const s = pl.stats || { perfectStash:0, safeStash:0, riskyDraw:0, riskyDrawNut:0 };
+      const rate = s.riskyDraw > 0 ? Math.round((s.riskyDrawNut / s.riskyDraw) * 1000) / 10 : 0;
+
+      const row = document.createElement("div");
+      row.className = "stashItem";
+      row.innerHTML = `
+        <div class="name">${escapeHtml(pl.name)}</div>
+        <div class="small" style="text-align:right;">
+          Perfect stash: <b>${s.perfectStash}</b><br/>
+          Safe stash: <b>${s.safeStash}</b><br/>
+          Risky draw: <b>${s.riskyDraw}</b><br/>
+          Risky draw success: <b>${s.riskyDrawNut}</b> / <b>${s.riskyDraw}</b> (${rate}%)
+        </div>
+      `;
+      table.appendChild(row);
+    }
+
+    wrap.appendChild(table);
+    statsBox.appendChild(wrap);
+  }
+
   function computeWinners(){
     let best = -1;
     for (const p of state.players) best = Math.max(best, p.stash);
@@ -807,7 +887,7 @@
         if (state.animLock) { scheduleCpuIfNeeded(); return; }
         if (shouldStop) await stashAndEndTurn();
         else await drawCard();
-      }, Math.max(500, Math.round(state.cpuDelayMs * 0.45)));
+      }, Math.round(state.cpuDelayMs * 0.45));
 
     }, state.cpuDelayMs);
   }
@@ -847,7 +927,46 @@
       handCards.appendChild(more);
     }
   }
+	
+  function renderEndStats(){
+	  statsBox.innerHTML = "";
+	  if (state.status !== "ended") return;
 
+	  const wrap = document.createElement("div");
+	  wrap.className = "winner"; // reuse same styling box
+
+	  const title = document.createElement("div");
+	  title.className = "muted";
+	  title.style.fontSize = "13px";
+	  title.textContent = "Decision statistics";
+	  wrap.appendChild(title);
+
+	  const table = document.createElement("div");
+	  table.style.marginTop = "8px";
+	  table.style.display = "grid";
+	  table.style.gap = "8px";
+
+	  for (const pl of state.players){
+		const s = pl.stats || { perfectStash:0, safeStash:0, riskyDraw:0, riskyDrawNut:0 };
+		const rate = s.riskyDraw > 0 ? Math.round((s.riskyDrawNut / s.riskyDraw) * 1000) / 10 : 0;
+
+		const row = document.createElement("div");
+		row.className = "stashItem";
+		row.innerHTML = `
+		  <div class="name">${escapeHtml(pl.name)}</div>
+		  <div class="small" style="text-align:right;">
+			Perfect stash: <b>${s.perfectStash}</b><br/>
+			Safe stash: <b>${s.safeStash}</b><br/>
+			Risky draw: <b>${s.riskyDraw}</b><br/>
+			Risky draw success: <b>${s.riskyDrawNut}</b> / <b>${s.riskyDraw}</b> (${rate}%)
+		  </div>
+		`;
+		table.appendChild(row);
+	  }
+
+	  wrap.appendChild(table);
+	  statsBox.appendChild(wrap);
+	}	
   function renderAll(){
     cpuSpeedLabel.textContent = state.cpuDelayMs + "ms";
 
@@ -917,7 +1036,7 @@
       item.appendChild(right);
       stashList.appendChild(item);
     }
-
+	
     // Winner
     winnerBox.innerHTML = "";
     if (state.status === "ended"){
@@ -978,6 +1097,10 @@
     // Lock CPU selects while playing
     const selects = cpuLines.querySelectorAll("select");
     selects.forEach(sel => sel.disabled = (state.status === "playing"));
+  
+
+    // Live stats panel
+    renderLiveStats();
   }
 
   // ===== Events =====
@@ -989,8 +1112,8 @@
   btnDefaults.addEventListener("click", () => {
     inpHumans.value = 1;
     inpCPUs.value = 1;
-    cpuSpeed.value = 1500;
-    state.cpuDelayMs = 1500;
+    cpuSpeed.value = 1000;
+    state.cpuDelayMs = 1000;
     state.cpuPersonalityIds = ["cool","wimpy","wild","math"];
     applyConfigNormalize();
     renderAll();
@@ -1031,7 +1154,7 @@
   state.players = makePlayers(1,1,["cool"]);
   state.deck = buildDeck();
   state.discard = [];
-  state.cpuDelayMs = parseInt(cpuSpeed.value, 10);
+  state.cpuDelayMs = Math.max(100, Math.min(2000, parseInt(cpuSpeed.value, 10) || 1000));
   renderLog();
   renderAll();
 })();
