@@ -13,7 +13,7 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
     }
     body{ margin:0; background:var(--bg); color:var(--text); }
-    .wrap{ max-width:1100px; margin:0 auto; padding:18px; }
+    .wrap{ max-width:1150px; margin:0 auto; padding:18px; }
     header{ display:flex; gap:14px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; }
     h1{ margin:0; font-size:34px; letter-spacing:-.02em; }
     .subtitle{ color:var(--muted); margin-top:6px; }
@@ -30,6 +30,8 @@
     .panel{
       background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
       box-shadow: var(--shadow); padding:16px;
+      position:relative;
+      overflow:hidden;
     }
     .panel h2{ margin:0; font-size:14px; color:#222; }
     .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -54,16 +56,93 @@
       background:var(--black); color:#fff; margin-left:8px;
     }
 
-    .cardBox{ display:flex; align-items:center; justify-content:center; min-height:260px; }
+    /* Big reveal card */
+    .cardBox{ display:flex; align-items:center; justify-content:center; min-height:260px; position:relative; }
     .card{
       width:160px; height:220px; border-radius:24px; border:1px solid var(--border);
       display:flex; flex-direction:column; justify-content:center; align-items:center;
       box-shadow: var(--shadow); user-select:none;
+      background:#fff;
     }
     .card.nut{ background:#fff8e6; border-color:#f0ddaa; }
     .card.squirrel{ background:#ecfff2; border-color:#bfe9cc; }
     .emoji{ font-size:64px; margin-bottom:10px; }
     .cardLabel{ font-size:18px; font-weight:900; letter-spacing:.08em; }
+
+    /* Small hand cards */
+    .handArea{
+      margin-top:10px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:12px;
+      background:#f6f6f6;
+    }
+    .handTop{ display:flex; justify-content:space-between; gap:10px; align-items:center; }
+    .handCards{
+      margin-top:10px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      min-height:54px;
+      align-items:center;
+    }
+    .miniCard{
+      width:42px; height:56px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: var(--shadow);
+      font-size:22px;
+      user-select:none;
+    }
+    .miniCard.nut{ background:#fff8e6; border-color:#f0ddaa; }
+    .miniCard.squirrel{ background:#ecfff2; border-color:#bfe9cc; }
+
+    /* Deck + discard graphics */
+    .pileRow{ display:flex; gap:12px; align-items:center; justify-content:center; }
+    .pile{
+      width:120px; height:160px;
+      border-radius:20px;
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .pile .stack{
+      position:absolute; inset:0;
+      border-radius:20px;
+      border:1px solid var(--border);
+      background:#fff;
+      box-shadow: var(--shadow);
+    }
+    .pile .stack::before,
+    .pile .stack::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:20px;
+      border:1px solid var(--border);
+      background:#fff;
+      z-index:-1;
+    }
+    .pile .stack::before{ transform: translate(4px,4px); opacity:.7; }
+    .pile .stack::after{ transform: translate(8px,8px); opacity:.45; }
+    .pileLabel{
+      position:relative;
+      z-index:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:6px;
+      font-weight:900;
+    }
+    .pileLabel small{ font-weight:700; color:var(--muted); }
+    .pileLabel .count{ font-variant-numeric:tabular-nums; font-size:20px; }
+    .pileHint{ font-size:12px; color:var(--muted); margin-top:6px; text-align:center; }
 
     .stashList{ margin-top:10px; display:grid; gap:8px; }
     .stashItem{
@@ -89,10 +168,11 @@
     .logItem b{ font-weight:900; }
 
     label{ font-size:13px; color:#333; }
-    select, input[type="number"]{
+    select, input[type="number"], input[type="range"]{
       width:100%; padding:9px 10px; border-radius:12px; border:1px solid var(--border);
       font-size:14px; background:#fff;
     }
+    input[type="range"]{ padding:0; height:34px; }
     .formGrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
     .cpuLines{ margin-top:10px; display:grid; gap:8px; }
     .cpuLine{ display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:center; }
@@ -101,6 +181,27 @@
     .winner{
       margin-top:10px; border:1px solid var(--border); border-radius:18px; padding:12px; background:#fff;
     }
+
+    /* Flying card animation */
+    .flyCard{
+      position:fixed;
+      width:110px; height:150px;
+      border-radius:20px;
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:46px;
+      z-index:9999;
+      pointer-events:none;
+      transform: translate(-50%,-50%);
+      transition: left var(--dur) ease, top var(--dur) ease, transform var(--dur) ease, opacity var(--dur) ease;
+      opacity:1;
+      background:#fff;
+    }
+    .flyCard.nut{ background:#fff8e6; border-color:#f0ddaa; }
+    .flyCard.squirrel{ background:#ecfff2; border-color:#bfe9cc; }
   </style>
 </head>
 
@@ -109,7 +210,7 @@
     <header>
       <div>
         <h1>Nut, Nut, Squirrel</h1>
-        <div class="subtitle">A push-your-luck card game — pure HTML/JS edition.</div>
+        <div class="subtitle">Now with hand graphics + draw animation + slower CPUs.</div>
       </div>
       <div class="pills">
         <div class="pill">Center: <b id="pillCenter">60</b></div>
@@ -139,6 +240,33 @@
             </div>
           </div>
 
+          <!-- Deck + Discard graphics -->
+          <div class="pileRow" style="margin-top:14px;">
+            <div>
+              <div class="pile" id="deckPile">
+                <div class="stack"></div>
+                <div class="pileLabel">
+                  <div>DECK</div>
+                  <div class="count" id="deckCount">60</div>
+                  <small>tap Draw</small>
+                </div>
+              </div>
+              <div class="pileHint">Center pile</div>
+            </div>
+
+            <div>
+              <div class="pile" id="discardPile" style="filter:saturate(.9);">
+                <div class="stack" style="background:#f6f6f6;"></div>
+                <div class="pileLabel">
+                  <div>DISCARD</div>
+                  <div class="count" id="discardCount">0</div>
+                  <small>used cards</small>
+                </div>
+              </div>
+              <div class="pileHint">Discard pile</div>
+            </div>
+          </div>
+
           <div class="twoCol">
             <div class="cardBox" id="cardBox">
               <div class="muted">Draw a card to reveal it.</div>
@@ -151,8 +279,20 @@
             </div>
           </div>
 
+          <!-- Hand graphics -->
+          <div class="handArea">
+            <div class="handTop">
+              <div>
+                <div style="font-weight:900;">Current hand (this turn)</div>
+                <div class="small">These are the Nut cards you’re risking. Squirrel wipes them.</div>
+              </div>
+              <div class="pill">In hand: <b id="handCountPill">0</b></div>
+            </div>
+            <div class="handCards" id="handCards"></div>
+          </div>
+
           <div class="muted" style="margin-top:12px;font-size:13px;">
-            <b>Rules:</b> Draw from center. NUT stays in hand. SQUIRREL discards the squirrel card and all nuts in hand, ending your turn.
+            <b>Rules:</b> Draw from center. NUT stays in hand. SQUIRREL discards squirrel + all nuts in hand, ending your turn.
             After a NUT, you may stop to stash all nuts in hand (safe) and end your turn.
           </div>
         </div>
@@ -180,6 +320,12 @@
               <label>CPU players</label>
               <input id="inpCPUs" type="number" min="0" max="4" value="1" />
             </div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <label>CPU speed (slower = more chill)</label>
+            <input id="cpuSpeed" type="range" min="100" max="2000" step="50" value="1000" />
+			<div class="small">Delay per CPU decision: <b id="cpuSpeedLabel">1000ms</b></div>
           </div>
 
           <div class="cpuLines" id="cpuLines"></div>
@@ -217,7 +363,7 @@
               <h2>Gain vs risk (this turn)</h2>
               <div class="stat"><span>Gain = P(NUT)</span><span id="gain">—</span></div>
               <div class="stat"><span id="riskLabel">Risk = P(SQUIRREL) × nuts-in-hand (0)</span><span id="risk">—</span></div>
-              <div class="small" style="margin-top:8px;">Matches your definition (risk scales with nuts you could lose).</div>
+              <div class="small" style="margin-top:8px;">Risk scales with nuts you could lose.</div>
             </div>
 
             <div class="soft">
@@ -238,12 +384,10 @@
 
 <script>
 (() => {
-  // ===== Spec constants =====
   const TOTAL_CARDS = 60;
   const NUTS_TOTAL = 45;
   const SQUIRRELS_TOTAL = 15;
 
-  // ===== CPU personalities =====
   const CPU = {
     wild: { id:"wild", name:"Wild Isaac", decide: ({nutsInHand}) => nutsInHand >= 5 },
     wimpy:{ id:"wimpy", name:"Wimpy Isaac", decide: ({nutsInHand}) => nutsInHand >= 3 },
@@ -251,7 +395,6 @@
     math: { id:"math", name:"Math Champion Isaac", decide: ({gain, risk}) => risk > gain },
   };
 
-  // ===== DOM =====
   const $ = (id) => document.getElementById(id);
 
   const btnDraw = $("btnDraw");
@@ -272,13 +415,14 @@
   const probPanel = $("probPanel");
   const gainRiskPanel = $("gainRiskPanel");
 
-  // Pill trackers
+  const cpuSpeed = $("cpuSpeed");
+  const cpuSpeedLabel = $("cpuSpeedLabel");
+
   const pillCenter = $("pillCenter");
   const pillDiscard = $("pillDiscard");
   const pillDrawnNuts = $("pillDrawnNuts");
   const pillDrawnSquirrels = $("pillDrawnSquirrels");
 
-  // Main UI
   const curPlayer = $("curPlayer");
   const handNutsEl = $("handNuts");
   const cardBox = $("cardBox");
@@ -286,7 +430,6 @@
   const winnerBox = $("winnerBox");
   const logEl = $("log");
 
-  // Monitors
   const pNutEl = $("pNut");
   const pSquirrelEl = $("pSquirrel");
   const gainEl = $("gain");
@@ -296,7 +439,14 @@
   const remNuts = $("remNuts");
   const remSquirrels = $("remSquirrels");
 
-  // ===== Helpers =====
+  const deckPile = $("deckPile");
+  const discardPile = $("discardPile");
+  const deckCount = $("deckCount");
+  const discardCount = $("discardCount");
+
+  const handCards = $("handCards");
+  const handCountPill = $("handCountPill");
+
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
   const nowStamp = () => {
     const d = new Date();
@@ -337,16 +487,19 @@
     return { pNut: remainingNuts/remaining, pSquirrel: remainingSquirrels/remaining };
   }
 
-  // Per your monitor definition:
-  // gain = P(NUT)
-  // risk = P(SQUIRREL) * nutsInHand
   function computeGainRisk(pNut, pSquirrel, nutsInHand){
     return { gain: pNut, risk: pSquirrel * nutsInHand };
   }
 
-  // ===== Game state =====
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;").replaceAll("<","&lt;")
+      .replaceAll(">","&gt;").replaceAll("\"","&quot;")
+      .replaceAll("'","&#039;");
+  }
+
   const state = {
-    status: "setup", // setup | playing | ended
+    status: "setup",
     players: [],
     deck: [],
     discard: [],
@@ -356,6 +509,8 @@
     log: [],
     cpuTimer: null,
     cpuPersonalityIds: ["cool","wimpy","wild","math"],
+    cpuDelayMs: 1500,
+    animLock: false,
   };
 
   function addLog(player, text){
@@ -382,15 +537,6 @@
     }
   }
 
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll("\"","&quot;")
-      .replaceAll("'","&#039;");
-  }
-
   function makePlayers(humans, cpus, cpuIds){
     const players = [];
     for (let i=0;i<humans;i++){
@@ -402,28 +548,6 @@
       players.push({ id:`C${j+1}`, name:`CPU ${j+1} (${pname})`, isCPU:true, cpu:pid, stash:0 });
     }
     return players;
-  }
-
-  function applyConfigNormalize(){
-    let humans = clamp(parseInt(inpHumans.value || "0", 10), 0, 4);
-    let cpus = clamp(parseInt(inpCPUs.value || "0", 10), 0, 4);
-
-    // total clamped 2..4, prefer keep humans
-    if (humans + cpus > 4){
-      cpus = Math.max(0, 4 - humans);
-      if (humans + cpus > 4) humans = 4 - cpus;
-    }
-    if (humans + cpus < 2){
-      humans = 2; cpus = 0;
-    }
-
-    inpHumans.value = humans;
-    inpCPUs.value = cpus;
-
-    // CPU personality selectors
-    renderCpuSelectors(cpus);
-
-    return { humans, cpus };
   }
 
   function renderCpuSelectors(cpus){
@@ -460,30 +584,23 @@
     }
   }
 
-  function resetGame(){
-    const { humans, cpus } = applyConfigNormalize();
-    const cpuIds = state.cpuPersonalityIds.slice(0, cpus);
-    while (cpuIds.length < cpus) cpuIds.push("cool");
+  function applyConfigNormalize(){
+    let humans = clamp(parseInt(inpHumans.value || "0", 10), 0, 4);
+    let cpus = clamp(parseInt(inpCPUs.value || "0", 10), 0, 4);
 
-    state.players = makePlayers(humans, cpus, cpuIds);
-    state.deck = buildDeck();
-    state.discard = [];
-    state.turnIndex = 0;
-    state.handNuts = 0;
-    state.lastCard = null;
-    state.status = "playing";
-    state.log = [];
+    if (humans + cpus > 4){
+      cpus = Math.max(0, 4 - humans);
+      if (humans + cpus > 4) humans = 4 - cpus;
+    }
+    if (humans + cpus < 2){
+      humans = 2; cpus = 0;
+    }
 
-    addLog("System", "New game started.");
-    renderAll();
-    scheduleCpuIfNeeded();
-  }
+    inpHumans.value = humans;
+    inpCPUs.value = cpus;
 
-  function endGame(manual=false){
-    state.status = "ended";
-    addLog("System", manual ? "Game ended manually." : "Deck is empty. Game ended.");
-    renderAll();
-    clearCpuTimer();
+    renderCpuSelectors(cpus);
+    return { humans, cpus };
   }
 
   function clearCpuTimer(){
@@ -497,16 +614,46 @@
     return state.players[state.turnIndex];
   }
 
+  function resetGame(){
+    const { humans, cpus } = applyConfigNormalize();
+    const cpuIds = state.cpuPersonalityIds.slice(0, cpus);
+    while (cpuIds.length < cpus) cpuIds.push("cool");
+
+    state.players = makePlayers(humans, cpus, cpuIds);
+    state.deck = buildDeck();
+    state.discard = [];
+    state.turnIndex = 0;
+    state.handNuts = 0;
+    state.lastCard = null;
+    state.status = "playing";
+    state.log = [];
+    state.animLock = false;
+
+    addLog("System", "New game started.");
+    renderAll();
+    scheduleCpuIfNeeded();
+  }
+
+  function endGame(manual=false){
+    state.status = "ended";
+    addLog("System", manual ? "Game ended manually." : "Deck is empty. Game ended.");
+    renderAll();
+    clearCpuTimer();
+  }
+
   function endTurnAdvance(){
     state.handNuts = 0;
     state.lastCard = null;
+    renderAll();
     state.turnIndex = (state.turnIndex + 1) % state.players.length;
     renderAll();
     scheduleCpuIfNeeded();
   }
 
-  function stashAndEndTurn(){
+  async function stashAndEndTurn(){
     if (state.status !== "playing") return;
+    if (state.animLock) return;
+
     const p = currentPlayer();
     if (state.handNuts > 0){
       p.stash += state.handNuts;
@@ -517,42 +664,113 @@
     endTurnAdvance();
   }
 
-  function drawCard(){
-    if (state.status !== "playing") return;
-    if (state.deck.length <= 0) return;
+  function getCenterOf(el){
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width/2, y: r.top + r.height/2 };
+  }
 
-    const p = currentPlayer();
-    const card = state.deck.pop();
-    state.lastCard = card;
+  function emojiFor(type){
+    return type === "NUT" ? "🥜" : "🐿️";
+  }
 
-    if (card === "NUT"){
-      state.handNuts += 1;
-      state.discard.push("NUT");
-      addLog(p.name, "Drew a NUT. (kept in hand)");
-      renderAll();
-      scheduleCpuIfNeeded(); // CPU may decide to continue/stop
-    } else {
-      // SQUIRREL: discard squirrel + all nuts in hand and end turn
-      const nutsToDiscard = state.handNuts;
-      state.discard.push("SQUIRREL");
-      for (let i=0;i<nutsToDiscard;i++) state.discard.push("NUT");
-      state.handNuts = 0;
-      addLog(p.name, `Drew a SQUIRREL! Discarded squirrel + ${nutsToDiscard} nut(s) from hand. Turn ended.`);
-      // If last card was drawn, game ends after resolution (no next turn)
-      if (state.deck.length === 0){
-        renderAll();
-        endGame(false);
-      } else {
-        endTurnAdvance();
-      }
-      return;
-    }
+  // Creates a flying card from source element to destination element
+  async function animateFlyCard(type, sourceEl, destEl, durMs){
+  // If anything is missing, skip animation (but keep game working)
+  if (!sourceEl || !destEl) return;
 
-    // If we drew the last card and it was a NUT, the game ends immediately after draw.
-    if (state.deck.length === 0){
-      renderAll();
-      endGame(false);
-    }
+  const srcRect = sourceEl.getBoundingClientRect?.();
+  const dstRect = destEl.getBoundingClientRect?.();
+  if (!srcRect || !dstRect || srcRect.width === 0 || dstRect.width === 0) return;
+
+  const src = { x: srcRect.left + srcRect.width/2, y: srcRect.top + srcRect.height/2 };
+  const dst = { x: dstRect.left + dstRect.width/2, y: dstRect.top + dstRect.height/2 };
+
+  const fly = document.createElement("div");
+  fly.className = `flyCard ${type === "NUT" ? "nut" : "squirrel"}`;
+  fly.style.setProperty("--dur", durMs + "ms");
+  fly.textContent = emojiFor(type);
+  fly.style.left = src.x + "px";
+  fly.style.top = src.y + "px";
+  fly.style.transform = "translate(-50%,-50%) scale(1.02)";
+  document.body.appendChild(fly);
+
+  fly.getBoundingClientRect(); // force layout
+
+  fly.style.left = dst.x + "px";
+  fly.style.top = dst.y + "px";
+  fly.style.transform = "translate(-50%,-50%) scale(0.9)";
+  fly.style.opacity = "0.98";
+
+  await new Promise(res => setTimeout(res, durMs + 30));
+  fly.remove();
+}
+
+  async function drawCard(){
+	  if (state.status !== "playing") return;
+	  if (state.deck.length <= 0) return;
+	  if (state.animLock) return;
+
+	  state.animLock = true;
+	  renderAll(); // disables buttons during animation
+
+	  try {
+		const p = currentPlayer();
+		const card = state.deck.pop();
+		state.lastCard = card;
+
+		const dur = 420;
+		const toEl = (card === "NUT") ? handCards : discardPile;
+
+		await animateFlyCard(card, deckPile, toEl, dur);
+
+		if (card === "NUT"){
+		  state.handNuts += 1;
+		  state.discard.push("NUT");
+		  addLog(p.name, "Drew a NUT. (kept in hand)");
+		  renderAll();
+
+		  if (state.deck.length === 0) endGame(false);
+		  else scheduleCpuIfNeeded();
+
+		  return;
+		}
+
+		// SQUIRREL: discard ONLY the squirrel card (nuts were already discarded when drawn)
+		const nutsLost = state.handNuts;
+
+		state.discard.push("SQUIRREL");
+
+		addLog(p.name, `Drew a SQUIRREL! Lost ${nutsLost} nut(s) from hand. Turn ended.`);
+
+		// Optional wipe animation (purely visual; does NOT change discard counts)
+		const wipeCount = Math.min(nutsLost, 6);
+		for (let k = 0; k < wipeCount; k++){
+		  await animateFlyCard("NUT", handCards, discardPile, 240);
+		}
+
+		state.handNuts = 0;
+		renderAll();
+
+		if (state.deck.length === 0) {
+		  endGame(false);
+		} else {
+		  endTurnAdvance();
+		}
+	  } catch (err) {
+		console.error("drawCard error:", err);
+		addLog("System", "Animation error occurred — continuing without animation.");
+	  } finally {
+		// ✅ Always unlock buttons
+		state.animLock = false;
+		renderAll();
+	  }
+	}
+
+  function computeWinners(){
+    let best = -1;
+    for (const p of state.players) best = Math.max(best, p.stash);
+    const winners = state.players.filter(p => p.stash === best);
+    return { best, winners };
   }
 
   function scheduleCpuIfNeeded(){
@@ -563,14 +781,15 @@
     const p = currentPlayer();
     if (!p || !p.isCPU) return;
 
-    // CPU delays a bit so you can see updates
-    state.cpuTimer = setTimeout(() => {
+    // slower CPU: uses state.cpuDelayMs (slider)
+    state.cpuTimer = setTimeout(async () => {
       if (state.status !== "playing") return;
       if (state.deck.length <= 0) return;
+      if (state.animLock) { scheduleCpuIfNeeded(); return; }
 
-      // CPU can only stop after at least one nut in hand (same as UI logic)
+      // CPU must draw if no nuts in hand
       if (state.handNuts === 0){
-        drawCard();
+        await drawCard();
         return;
       }
 
@@ -582,44 +801,80 @@
       const personality = CPU[p.cpu] || CPU.cool;
       const shouldStop = personality.decide({ nutsInHand: state.handNuts, gain, risk });
 
-      if (shouldStop) stashAndEndTurn();
-      else drawCard();
-    }, 550);
+      // extra pause between “thinking” and acting
+      state.cpuTimer = setTimeout(async () => {
+        if (state.status !== "playing") return;
+        if (state.animLock) { scheduleCpuIfNeeded(); return; }
+        if (shouldStop) await stashAndEndTurn();
+        else await drawCard();
+      }, Math.max(500, Math.round(state.cpuDelayMs * 0.45)));
+
+    }, state.cpuDelayMs);
   }
 
-  function computeWinners(){
-    let best = -1;
-    for (const p of state.players) best = Math.max(best, p.stash);
-    const winners = state.players.filter(p => p.stash === best);
-    return { best, winners };
+  function renderHandGraphics(){
+    handCards.innerHTML = "";
+    handCountPill.textContent = String(state.handNuts);
+
+    if (state.status !== "playing"){
+      const div = document.createElement("div");
+      div.className = "small";
+      div.textContent = "Start a game to build a hand.";
+      handCards.appendChild(div);
+      return;
+    }
+
+    if (state.handNuts === 0){
+      const div = document.createElement("div");
+      div.className = "small";
+      div.textContent = "No nuts in hand yet — draw to begin your push-your-luck!";
+      handCards.appendChild(div);
+      return;
+    }
+
+    // Render one mini nut card per nut in hand (cap display for huge counts)
+    const show = Math.min(state.handNuts, 20);
+    for (let i=0;i<show;i++){
+      const c = document.createElement("div");
+      c.className = "miniCard nut";
+      c.textContent = "🥜";
+      handCards.appendChild(c);
+    }
+    if (state.handNuts > show){
+      const more = document.createElement("div");
+      more.className = "pill";
+      more.textContent = `+${state.handNuts - show} more`;
+      handCards.appendChild(more);
+    }
   }
 
-  // ===== Rendering =====
   function renderAll(){
-    // Setup lock note
+    cpuSpeedLabel.textContent = state.cpuDelayMs + "ms";
+
     const locked = (state.status === "playing");
     inpHumans.disabled = locked;
     inpCPUs.disabled = locked;
+    cpuSpeed.disabled = locked;
     setupNote.textContent = locked ? "Setup is locked during a game. End or restart to change player counts." : "";
 
     // Buttons
     btnStart.style.display = (state.status === "setup") ? "" : "none";
-    btnRestart.disabled = (state.status === "playing"); // use End/Restart? we'll allow restart only when not playing
-    // But keep restart usable in setup/ended:
     btnRestart.disabled = (state.status === "playing");
+    btnDraw.disabled = true;
+    btnStash.disabled = true;
+    btnEnd.disabled = (state.status !== "playing");
 
     const p = currentPlayer();
     const humanTurn = (state.status === "playing" && p && !p.isCPU);
 
-    btnDraw.disabled = !humanTurn || state.deck.length === 0;
-    btnStash.disabled = !humanTurn || state.deck.length === 0 || state.handNuts === 0;
-    btnEnd.disabled = (state.status !== "playing");
+    btnDraw.disabled = !humanTurn || state.deck.length === 0 || state.animLock;
+    btnStash.disabled = !humanTurn || state.deck.length === 0 || state.handNuts === 0 || state.animLock;
 
-    // Current player label
+    // Turn label
     curPlayer.textContent = (state.status === "playing") ? p.name : "—";
     handNutsEl.textContent = String(state.handNuts);
 
-    // Card display
+    // Big reveal
     cardBox.innerHTML = "";
     if (!state.lastCard){
       const div = document.createElement("div");
@@ -640,7 +895,7 @@
       cardBox.appendChild(c);
     }
 
-    // Player stash list
+    // Stashes
     stashList.innerHTML = "";
     for (let i=0;i<state.players.length;i++){
       const pl = state.players[i];
@@ -663,7 +918,7 @@
       stashList.appendChild(item);
     }
 
-    // Winner box
+    // Winner
     winnerBox.innerHTML = "";
     if (state.status === "ended"){
       const { best, winners } = computeWinners();
@@ -687,11 +942,16 @@
       winnerBox.appendChild(div);
     }
 
-    // Pills + counts
+    // Piles + pills
     pillCenter.textContent = String(state.deck.length);
     pillDiscard.textContent = String(state.discard.length);
-    pillDrawnNuts.textContent = String(state.discard.filter(x => x==="NUT").length);
-    pillDrawnSquirrels.textContent = String(state.discard.filter(x => x==="SQUIRREL").length);
+    const drawnN = state.discard.filter(x => x==="NUT").length;
+    const drawnS = state.discard.filter(x => x==="SQUIRREL").length;
+    pillDrawnNuts.textContent = String(drawnN);
+    pillDrawnSquirrels.textContent = String(drawnS);
+
+    deckCount.textContent = String(state.deck.length);
+    discardCount.textContent = String(state.discard.length);
 
     // Monitors
     probPanel.style.display = chkProb.checked ? "" : "none";
@@ -712,7 +972,10 @@
     remNuts.textContent = String(remainingNuts);
     remSquirrels.textContent = String(remainingSquirrels);
 
-    // CPU selectors lock
+    // Hand graphics
+    renderHandGraphics();
+
+    // Lock CPU selects while playing
     const selects = cpuLines.querySelectorAll("select");
     selects.forEach(sel => sel.disabled = (state.status === "playing"));
   }
@@ -720,13 +983,14 @@
   // ===== Events =====
   btnStart.addEventListener("click", () => resetGame());
   btnRestart.addEventListener("click", () => {
-    // Restart allowed when not actively playing to avoid confusion; end game first if needed
     if (state.status === "playing") return;
     resetGame();
   });
   btnDefaults.addEventListener("click", () => {
     inpHumans.value = 1;
     inpCPUs.value = 1;
+    cpuSpeed.value = 1500;
+    state.cpuDelayMs = 1500;
     state.cpuPersonalityIds = ["cool","wimpy","wild","math"];
     applyConfigNormalize();
     renderAll();
@@ -752,6 +1016,13 @@
     renderAll();
   });
 
+  cpuSpeed.addEventListener("input", () => {
+	  if (state.status === "playing") return;
+
+	  state.cpuDelayMs = Math.max(100, Math.min(2000, parseInt(cpuSpeed.value, 10) || 1000));
+	  renderAll();
+	});
+
   chkProb.addEventListener("change", renderAll);
   chkGainRisk.addEventListener("change", renderAll);
 
@@ -760,6 +1031,7 @@
   state.players = makePlayers(1,1,["cool"]);
   state.deck = buildDeck();
   state.discard = [];
+  state.cpuDelayMs = parseInt(cpuSpeed.value, 10);
   renderLog();
   renderAll();
 })();
