@@ -240,6 +240,20 @@
             </div>
           </div>
 
+          <!-- Hand graphics (moved closer to controls) -->
+          <div class="handArea">
+            <div class="handTop">
+              <div>
+                <div style="font-weight:900;">Current hand (this turn)</div>
+                <div class="small">These are the Nut cards you’re risking. Squirrel wipes them.</div>
+              </div>
+              <div class="pill">In hand: <b id="handCountPill">0</b></div>
+            </div>
+            <div class="handCards" id="handCards"></div>
+          </div>
+
+
+
           <!-- Deck + Discard graphics -->
           <div class="pileRow" style="margin-top:14px;">
             <div>
@@ -281,18 +295,7 @@
           </div>
 
           <!-- Hand graphics -->
-          <div class="handArea">
-            <div class="handTop">
-              <div>
-                <div style="font-weight:900;">Current hand (this turn)</div>
-                <div class="small">These are the Nut cards you’re risking. Squirrel wipes them.</div>
-              </div>
-              <div class="pill">In hand: <b id="handCountPill">0</b></div>
-            </div>
-            <div class="handCards" id="handCards"></div>
-          </div>
-
-          <div class="muted" style="margin-top:12px;font-size:13px;">
+                    <div class="muted" style="margin-top:12px;font-size:13px;">
             <b>Rules:</b> Draw from center. NUT stays in hand. SQUIRREL discards squirrel + all nuts in hand, ending your turn.
             After a NUT, you may stop to stash all nuts in hand (safe) and end your turn.
           </div>
