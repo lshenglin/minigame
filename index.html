@@ -25,6 +25,7 @@
     }
     .pill b{ font-variant-numeric: tabular-nums; }
     .grid{ display:grid; grid-template-columns: 1.8fr 1fr; gap:14px; margin-top:16px; }
+    .grid.focusGame{ grid-template-columns:1fr; }
     @media (max-width: 920px){ .grid{ grid-template-columns:1fr; } }
 
     .panel{
@@ -47,6 +48,8 @@
     .btn.primary:hover{ background:#222; }
     .btn.danger{ color:var(--danger); border-color:#f0caca; }
     .btn.danger:hover{ background:#fff1f1; }
+    .btn.toggleOn{ background:#111; color:#fff; border-color:#111; }
+    .btn.toggleOn:hover{ background:#222; }
     .btn:disabled{ opacity:.5; cursor:not-allowed; }
 
     .muted{ color:var(--muted); }
@@ -177,6 +180,7 @@
     .cpuLines{ margin-top:10px; display:grid; gap:8px; }
     .cpuLine{ display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:center; }
     .small{ font-size:12px; color:var(--muted); line-height:1.35; }
+    .panelToggles{ margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
     footer{ margin-top:18px; font-size:12px; color:var(--muted); }
     .winner{
       margin-top:10px; border:1px solid var(--border); border-radius:18px; padding:12px; background:#fff;
@@ -220,10 +224,10 @@
       </div>
     </header>
 
-    <div class="grid">
+    <div class="grid focusGame" id="mainGrid">
       <!-- LEFT: Game -->
       <section>
-        <div class="panel">
+        <div class="panel" id="gamePanel">
           <div class="row space">
             <div>
               <div class="muted" style="font-size:13px;">Current turn</div>
@@ -238,6 +242,11 @@
               <button class="btn danger" id="btnEnd">End Game</button>
               <button class="btn primary" id="btnStart">Start</button>
             </div>
+          </div>
+          <div class="panelToggles">
+            <button class="btn" id="btnToggleSetup">Show Setup</button>
+            <button class="btn" id="btnToggleMonitors">Show Monitors</button>
+            <button class="btn" id="btnToggleLog">Show Game Log</button>
           </div>
 
           <!-- Hand graphics (moved closer to controls) -->
@@ -301,7 +310,7 @@
           </div>
         </div>
 
-        <div class="panel" style="margin-top:14px;">
+        <div class="panel" id="logPanel" style="margin-top:14px; display:none;">
           <div class="row space">
             <h2>Game log</h2>
             <button class="btn" id="btnClearLog">Clear</button>
@@ -311,8 +320,8 @@
       </section>
 
       <!-- RIGHT: Setup + Monitors -->
-      <aside class="space-y">
-        <div class="panel">
+      <aside class="space-y" id="sidePanels" style="display:none;">
+        <div class="panel" id="setupPanel">
           <h2>Game setup</h2>
 
           <div class="formGrid">
@@ -343,7 +352,7 @@
           <div class="small" id="setupNote" style="margin-top:8px;"></div>
         </div>
 
-        <div class="panel">
+        <div class="panel" id="monitorsPanel">
           <h2>Monitors</h2>
 
           <div class="toggle">
@@ -408,6 +417,9 @@
   const btnRestart = $("btnRestart");
   const btnDefaults = $("btnDefaults");
   const btnClearLog = $("btnClearLog");
+  const btnToggleSetup = $("btnToggleSetup");
+  const btnToggleMonitors = $("btnToggleMonitors");
+  const btnToggleLog = $("btnToggleLog");
 
   const inpHumans = $("inpHumans");
   const inpCPUs = $("inpCPUs");
@@ -418,6 +430,12 @@
   const chkGainRisk = $("chkGainRisk");
   const probPanel = $("probPanel");
   const gainRiskPanel = $("gainRiskPanel");
+
+  const mainGrid = $("mainGrid");
+  const sidePanels = $("sidePanels");
+  const setupPanel = $("setupPanel");
+  const monitorsPanel = $("monitorsPanel");
+  const logPanel = $("logPanel");
 
   const cpuSpeed = $("cpuSpeed");
   const cpuSpeedLabel = $("cpuSpeedLabel");
@@ -524,6 +542,7 @@
     cpuPersonalityIds: ["cool","wimpy","wild","math"],
     cpuDelayMs: 1000,
     animLock: false,
+    uiPanels: { setup:false, monitors:false, log:false },
   };
 
   function addLog(player, text){
@@ -627,6 +646,33 @@
       clearTimeout(state.cpuTimer);
       state.cpuTimer = null;
     }
+  }
+
+  function renderPanelVisibility(){
+    const showSetup = state.uiPanels.setup;
+    const showMonitors = state.uiPanels.monitors;
+    const showLog = state.uiPanels.log;
+    const showSide = showSetup || showMonitors;
+
+    setupPanel.style.display = showSetup ? "" : "none";
+    monitorsPanel.style.display = showMonitors ? "" : "none";
+    sidePanels.style.display = showSide ? "" : "none";
+    logPanel.style.display = showLog ? "" : "none";
+
+    mainGrid.classList.toggle("focusGame", !showSide);
+
+    btnToggleSetup.textContent = showSetup ? "Hide Setup" : "Show Setup";
+    btnToggleMonitors.textContent = showMonitors ? "Hide Monitors" : "Show Monitors";
+    btnToggleLog.textContent = showLog ? "Hide Game Log" : "Show Game Log";
+
+    btnToggleSetup.classList.toggle("toggleOn", showSetup);
+    btnToggleMonitors.classList.toggle("toggleOn", showMonitors);
+    btnToggleLog.classList.toggle("toggleOn", showLog);
+  }
+
+  function togglePanel(panelKey){
+    state.uiPanels[panelKey] = !state.uiPanels[panelKey];
+    renderPanelVisibility();
   }
 
   function currentPlayer(){
@@ -1100,10 +1146,12 @@
     // Lock CPU selects while playing
     const selects = cpuLines.querySelectorAll("select");
     selects.forEach(sel => sel.disabled = (state.status === "playing"));
-  
 
     // Live stats panel
     renderLiveStats();
+
+    // Collapsible side/log panels
+    renderPanelVisibility();
   }
 
   // ===== Events =====
@@ -1130,6 +1178,10 @@
     state.log = [];
     renderLog();
   });
+
+  btnToggleSetup.addEventListener("click", () => togglePanel("setup"));
+  btnToggleMonitors.addEventListener("click", () => togglePanel("monitors"));
+  btnToggleLog.addEventListener("click", () => togglePanel("log"));
 
   inpHumans.addEventListener("input", () => {
     if (state.status === "playing") return;
@@ -1164,3 +1216,4 @@
 </script>
 </body>
 </html>
+
