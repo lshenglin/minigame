@@ -146,6 +146,9 @@
     .pileLabel small{ font-weight:700; color:var(--muted); }
     .pileLabel .count{ font-variant-numeric:tabular-nums; font-size:20px; }
     .pileHint{ font-size:12px; color:var(--muted); margin-top:6px; text-align:center; }
+    .pile.drawReady{ cursor:pointer; box-shadow: 0 0 0 2px rgba(248,203,87,.45); }
+    .pile.drawReady .stack{ border-color:#a46f10; }
+    .pile.drawDisabled{ cursor:not-allowed; opacity:.8; }
 
     .stashList{ margin-top:10px; display:grid; gap:8px; }
     .stashItem{
@@ -180,12 +183,261 @@
     .cpuLines{ margin-top:10px; display:grid; gap:8px; }
     .cpuLine{ display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:center; }
     .small{ font-size:12px; color:var(--muted); line-height:1.35; }
+    .headerActions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
     .panelToggles{ margin-top:12px; display:flex; flex-wrap:wrap; gap:8px; }
     footer{ margin-top:18px; font-size:12px; color:var(--muted); }
     .winner{
       margin-top:10px; border:1px solid var(--border); border-radius:18px; padding:12px; background:#fff;
     }
 
+    /* TCG-inspired restyle */
+    :root{
+      --bg:#0f4b39;
+      --card:#fefaf0;
+      --muted:#38544b;
+      --text:#11241e;
+      --border:#c7b27a;
+      --shadow: 0 10px 24px rgba(0,0,0,.22);
+      --black:#1c3f34;
+      --danger:#8f1f1a;
+      --radius:20px;
+      --boardGlow: radial-gradient(circle at 20% 20%, rgba(255,255,255,.12), transparent 45%), radial-gradient(circle at 80% 75%, rgba(255,210,130,.13), transparent 40%);
+      font-family: "Verdana", "Segoe UI", sans-serif;
+    }
+
+    body{
+      margin:0;
+      color:var(--text);
+      background: linear-gradient(160deg, #0f4b39 0%, #0b3328 52%, #0a2c23 100%);
+      background-attachment: fixed;
+      min-height:100vh;
+    }
+
+    .wrap{
+      max-width:1180px;
+      margin:0 auto;
+      padding:18px;
+      position:relative;
+    }
+
+    .wrap::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background: var(--boardGlow);
+      opacity:.9;
+      z-index:-1;
+    }
+
+    header{
+      background: rgba(244,233,197,.95);
+      border:1px solid #d2be8d;
+      border-radius: 18px;
+      padding:14px 16px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.18);
+    }
+
+    h1{
+      margin:0;
+      font-size:36px;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      color:#17352b;
+    }
+
+    .subtitle{
+      color:#355348;
+      margin-top:4px;
+      font-weight:700;
+      font-size:13px;
+      letter-spacing:.02em;
+    }
+
+    .pill{
+      padding:7px 11px;
+      border:1px solid #bda56f;
+      background:linear-gradient(180deg, #fff7e6, #f2e0b5);
+      border-radius:999px;
+      box-shadow: 0 4px 10px rgba(0,0,0,.12);
+      font-size:12px;
+      font-weight:700;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,252,245,.96), rgba(248,238,214,.96));
+      border:1px solid #bda56f;
+      border-radius:var(--radius);
+      box-shadow: 0 12px 24px rgba(0,0,0,.2);
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .panel::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(150deg, rgba(255,255,255,.26), transparent 48%);
+      pointer-events:none;
+    }
+
+    .panel > *{ position:relative; z-index:1; }
+
+    .panel h2{
+      font-size:13px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#27463c;
+    }
+
+    .btn{
+      border-radius:12px;
+      padding:10px 14px;
+      font-weight:800;
+      border:1px solid #a98e5b;
+      background: linear-gradient(180deg, #fff6df, #edd39b);
+      color:#17352b;
+      transition: transform .06s ease, filter .12s ease;
+      box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    }
+
+    .btn:hover{ filter:brightness(1.04); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: linear-gradient(180deg, #f8cb57, #eaa11b);
+      border-color:#a46f10;
+      color:#2a1e04;
+    }
+
+    .btn.primary:hover{ background: linear-gradient(180deg, #ffd36f, #f0af2c); }
+
+    .btn.danger{
+      color:#fff;
+      border-color:#71201a;
+      background: linear-gradient(180deg, #c63b33, #9a251f);
+    }
+
+    .btn.danger:hover{ background: linear-gradient(180deg, #d2463d, #a72b24); }
+
+    .btn.toggleOn{
+      background: linear-gradient(180deg, #326959, #20493d);
+      color:#fff;
+      border-color:#17352b;
+    }
+
+    .muted{ color:#3e5c52; }
+
+    .turnTag{
+      background: linear-gradient(180deg, #2f6655, #1f473b);
+      color:#fff;
+    }
+
+    .cardBox{
+      min-height:290px;
+      border-radius:20px;
+      border:1px dashed #b59a62;
+      background: rgba(255,250,238,.72);
+    }
+
+    .card{
+      width:176px;
+      height:244px;
+      border-radius:20px;
+      border:2px solid #bba36f;
+      box-shadow: 0 10px 20px rgba(0,0,0,.18);
+    }
+
+    .cardLabel{ letter-spacing:.1em; }
+
+    .handArea,
+    .soft,
+    .stashItem,
+    .winner,
+    .miniCard,
+    .pile .stack{
+      border-color:#bda56f;
+      background: rgba(255,248,231,.86);
+    }
+
+    .pileHint,
+    .small,
+    label{ color:#3b584e; }
+
+    .headerActions{ display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
+    .panelToggles{
+      margin-top:12px;
+      padding:10px;
+      border:1px dashed #b59a62;
+      border-radius:14px;
+      background: rgba(255,247,226,.72);
+    }
+
+    .playmat{
+      display:grid;
+      gap:12px;
+      grid-template-columns: 1fr 1fr;
+      grid-template-areas:
+        "deck stashes";
+    }
+
+    .zone{
+      border:1px dashed #b59a62;
+      border-radius:16px;
+      padding:10px;
+      background: rgba(255,248,230,.58);
+    }
+
+    .zoneTitle{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.1em;
+      font-weight:800;
+      color:#2f4d42;
+      margin-bottom:4px;
+    }
+
+
+    .zone-deck{ grid-area:deck; }
+    
+
+    .zone-stashes{ grid-area:stashes; border:none; padding:0; background:transparent; }
+    
+
+    
+    .zone-stashes .soft{ min-height:320px; }
+    .zone-deck .pileRow{ justify-content:space-around; }
+
+    .rulesStrip{
+      border:1px dashed #b59a62;
+      border-radius:14px;
+      padding:10px 12px;
+      background: rgba(255,247,226,.72);
+    }
+
+    footer{ color:#d9ebde; }
+
+    @media (max-width: 700px){
+      .playmat{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "deck"
+          "stashes";
+      }
+      .row.space > .row{
+        width:100%;
+      }
+      .row.space > .row .btn{
+        flex:1 1 45%;
+      }
+      .panelToggles .btn{
+        flex:1 1 100%;
+      }
+      h1{ font-size:28px; }
+      .card{ width:160px; height:224px; }
+    }
     /* Flying card animation */
     .flyCard{
       position:fixed;
@@ -214,102 +466,82 @@
     <header>
       <div>
         <h1>Nut, Nut, Squirrel</h1>
-        <div class="subtitle">Now with hand graphics + draw animation + slower CPUs.</div>
       </div>
-      <div class="pills">
-        <div class="pill">Center: <b id="pillCenter">60</b></div>
-        <div class="pill">Discard: <b id="pillDiscard">0</b></div>
-        <div class="pill">Drawn 🥜: <b id="pillDrawnNuts">0</b></div>
-        <div class="pill">Drawn 🐿️: <b id="pillDrawnSquirrels">0</b></div>
+      <div class="headerActions">
+        <button class="btn" id="btnToggleSetup">Show Setup</button>
+        <button class="btn" id="btnToggleMonitors">Show Monitors</button>
+        <button class="btn" id="btnToggleLog">Show Game Log</button>
+        <button class="btn danger" id="btnEnd">End Game</button>
       </div>
     </header>
 
     <div class="grid focusGame" id="mainGrid">
       <!-- LEFT: Game -->
       <section>
-        <div class="panel" id="gamePanel">
-          <div class="row space">
-            <div>
-              <div class="muted" style="font-size:13px;">Current turn</div>
-              <div class="big" id="curPlayer">—</div>
-              <div class="muted" style="margin-top:4px;font-size:13px;">
-                Nuts in hand this turn: <b id="handNuts" style="font-variant-numeric:tabular-nums;">0</b>
-              </div>
-            </div>
-            <div class="row">
-              <button class="btn primary" id="btnDraw">Draw</button>
-              <button class="btn" id="btnStash">Stash &amp; End Turn</button>
-              <button class="btn danger" id="btnEnd">End Game</button>
-              <button class="btn primary" id="btnStart">Start</button>
-            </div>
-          </div>
-          <div class="panelToggles">
-            <button class="btn" id="btnToggleSetup">Show Setup</button>
-            <button class="btn" id="btnToggleMonitors">Show Monitors</button>
-            <button class="btn" id="btnToggleLog">Show Game Log</button>
-          </div>
+        
+          <div class="panel" id="gamePanel">
+          <div class="playmat">
+            <div class="zone zone-deck">
+              <div class="pileRow" style="margin-top:10px;">
+                <div>
+                  <div class="pile" id="deckPile" role="button" tabindex="0" aria-label="Draw card from deck">
+                    <div class="stack"></div>
+                    <div class="pileLabel">
+                      <div>DECK</div>
+                      <div class="count" id="deckCount">60</div>
+                      <small>tap Draw</small>
+                    </div>
+                  </div>
+                  <div class="pileHint">Center pile (tap to draw)</div>
+                </div>
 
-          <!-- Hand graphics (moved closer to controls) -->
-          <div class="handArea">
-            <div class="handTop">
-              <div>
-                <div style="font-weight:900;">Current hand (this turn)</div>
-                <div class="small">These are the Nut cards you’re risking. Squirrel wipes them.</div>
-              </div>
-              <div class="pill">In hand: <b id="handCountPill">0</b></div>
-            </div>
-            <div class="handCards" id="handCards"></div>
-          </div>
-
-
-
-          <!-- Deck + Discard graphics -->
-          <div class="pileRow" style="margin-top:14px;">
-            <div>
-              <div class="pile" id="deckPile">
-                <div class="stack"></div>
-                <div class="pileLabel">
-                  <div>DECK</div>
-                  <div class="count" id="deckCount">60</div>
-                  <small>tap Draw</small>
+                <div>
+                  <div class="pile" id="discardPile" style="filter:saturate(.9);">
+                    <div class="stack" style="background:#f6f6f6;"></div>
+                    <div class="pileLabel">
+                      <div>DISCARD</div>
+                      <div class="count" id="discardCount">0</div>
+                      <small>🥜 drawn: <b id="discardNutCount">0</b></small>
+                      <small>🐿️ drawn: <b id="discardSquirrelCount">0</b></small>
+                    </div>
+                  </div>
+                  <div class="pileHint">Discard pile</div>
                 </div>
               </div>
-              <div class="pileHint">Center pile</div>
-            </div>
 
-            <div>
-              <div class="pile" id="discardPile" style="filter:saturate(.9);">
-                <div class="stack" style="background:#f6f6f6;"></div>
-                <div class="pileLabel">
-                  <div>DISCARD</div>
-                  <div class="count" id="discardCount">0</div>
-                  <small>used cards</small>
+              <div class="handArea" style="margin-top:12px;">
+                <div class="handTop">
+                  <div>
+                    <div style="font-weight:900;">Current hand (this turn)</div>
+                    <div class="small">Current player: <b id="curPlayer">—</b></div>
+                    <div class="small">These are the Nut cards you’re risking. Squirrel wipes them.</div>
+                  </div>
+                </div>
+                <span id="handNuts" style="display:none;">0</span>
+                <span id="handCountPill" style="display:none;">0</span>
+                <div class="handCards" id="handCards"></div>
+                <div class="handActions" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                  <button class="btn primary" id="btnStart">Start</button>
+                  <button class="btn" id="btnStash">Stash &amp; End Turn</button>
                 </div>
               </div>
-              <div class="pileHint">Discard pile</div>
+            </div>
+
+            <div class="zone zone-stashes">
+              <div class="soft" style="margin-top:0;">
+                <h2>Player stashes</h2>
+                <div class="stashList" id="stashList"></div>
+                <div id="winnerBox"></div>
+                <div id="statsBox"></div>
+              </div>
             </div>
           </div>
 
-          <div class="twoCol">
-            <div class="cardBox" id="cardBox">
-              <div class="muted">Draw a card to reveal it.</div>
-            </div>
-
-            <div class="soft">
-              <h2>Player stashes</h2>
-              <div class="stashList" id="stashList"></div>
-              <div id="winnerBox"></div>
-			  <div id="statsBox"></div>
-            </div>
-          </div>
-
-          <!-- Hand graphics -->
-                    <div class="muted" style="margin-top:12px;font-size:13px;">
+          <div class="rulesStrip muted" style="margin-top:12px;font-size:13px;">
             <b>Rules:</b> Draw from center. NUT stays in hand. SQUIRREL discards squirrel + all nuts in hand, ending your turn.
             After a NUT, you may stop to stash all nuts in hand (safe) and end your turn.
           </div>
         </div>
-
         <div class="panel" id="logPanel" style="margin-top:14px; display:none;">
           <div class="row space">
             <h2>Game log</h2>
@@ -410,7 +642,7 @@
 
   const $ = (id) => document.getElementById(id);
 
-  const btnDraw = $("btnDraw");
+  const btnDraw = $("btnDraw"); // optional: deck tap is primary draw control
   const btnStash = $("btnStash");
   const btnEnd = $("btnEnd");
   const btnStart = $("btnStart");
@@ -466,6 +698,8 @@
   const discardPile = $("discardPile");
   const deckCount = $("deckCount");
   const discardCount = $("discardCount");
+  const discardNutCount = $("discardNutCount");
+  const discardSquirrelCount = $("discardSquirrelCount");
 
   const handCards = $("handCards");
   const handCountPill = $("handCountPill");
@@ -1026,41 +1260,44 @@
     setupNote.textContent = locked ? "Setup is locked during a game. End or restart to change player counts." : "";
 
     // Buttons
-    btnStart.style.display = (state.status === "setup") ? "" : "none";
+    btnStart.style.display = (state.status === "setup" || state.status === "ended") ? "" : "none";
     btnRestart.disabled = (state.status === "playing");
-    btnDraw.disabled = true;
+    if (btnDraw) btnDraw.disabled = true;
     btnStash.disabled = true;
     btnEnd.disabled = (state.status !== "playing");
 
     const p = currentPlayer();
     const humanTurn = (state.status === "playing" && p && !p.isCPU);
 
-    btnDraw.disabled = !humanTurn || state.deck.length === 0 || state.animLock;
+    if (btnDraw) btnDraw.disabled = !humanTurn || state.deck.length === 0 || state.animLock;
     btnStash.disabled = !humanTurn || state.deck.length === 0 || state.handNuts === 0 || state.animLock;
+    deckPile.classList.toggle("drawReady", humanTurn && state.deck.length > 0 && !state.animLock);
+    deckPile.classList.toggle("drawDisabled", !(humanTurn && state.deck.length > 0 && !state.animLock));
 
     // Turn label
     curPlayer.textContent = (state.status === "playing") ? p.name : "—";
     handNutsEl.textContent = String(state.handNuts);
-
-    // Big reveal
-    cardBox.innerHTML = "";
-    if (!state.lastCard){
-      const div = document.createElement("div");
-      div.className = "muted";
-      div.textContent = "Draw a card to reveal it.";
-      cardBox.appendChild(div);
-    } else {
-      const c = document.createElement("div");
-      c.className = "card " + (state.lastCard === "NUT" ? "nut" : "squirrel");
-      const emoji = document.createElement("div");
-      emoji.className = "emoji";
-      emoji.textContent = (state.lastCard === "NUT" ? "🥜" : "🐿️");
-      const label = document.createElement("div");
-      label.className = "cardLabel";
-      label.textContent = state.lastCard;
-      c.appendChild(emoji);
-      c.appendChild(label);
-      cardBox.appendChild(c);
+    // Big reveal (optional panel)
+    if (cardBox){
+      cardBox.innerHTML = "";
+      if (!state.lastCard){
+        const div = document.createElement("div");
+        div.className = "muted";
+        div.textContent = "Draw a card to reveal it.";
+        cardBox.appendChild(div);
+      } else {
+        const c = document.createElement("div");
+        c.className = "card " + (state.lastCard === "NUT" ? "nut" : "squirrel");
+        const emoji = document.createElement("div");
+        emoji.className = "emoji";
+        emoji.textContent = (state.lastCard === "NUT" ? "🥜" : "🐿️");
+        const label = document.createElement("div");
+        label.className = "cardLabel";
+        label.textContent = state.lastCard;
+        c.appendChild(emoji);
+        c.appendChild(label);
+        cardBox.appendChild(c);
+      }
     }
 
     // Stashes
@@ -1109,17 +1346,18 @@
       div.appendChild(score);
       winnerBox.appendChild(div);
     }
-
-    // Piles + pills
-    pillCenter.textContent = String(state.deck.length);
-    pillDiscard.textContent = String(state.discard.length);
-    const drawnN = state.discard.filter(x => x==="NUT").length;
-    const drawnS = state.discard.filter(x => x==="SQUIRREL").length;
-    pillDrawnNuts.textContent = String(drawnN);
-    pillDrawnSquirrels.textContent = String(drawnS);
+    // Piles + optional header pills
+    if (pillCenter) pillCenter.textContent = String(state.deck.length);
+    if (pillDiscard) pillDiscard.textContent = String(state.discard.length);
+    const drawnN = state.discard.filter(x => x === "NUT").length;
+    const drawnS = state.discard.filter(x => x === "SQUIRREL").length;
+    if (pillDrawnNuts) pillDrawnNuts.textContent = String(drawnN);
+    if (pillDrawnSquirrels) pillDrawnSquirrels.textContent = String(drawnS);
 
     deckCount.textContent = String(state.deck.length);
     discardCount.textContent = String(state.discard.length);
+    if (discardNutCount) discardNutCount.textContent = String(drawnN);
+    if (discardSquirrelCount) discardSquirrelCount.textContent = String(drawnS);
 
     // Monitors
     probPanel.style.display = chkProb.checked ? "" : "none";
@@ -1170,7 +1408,23 @@
     renderAll();
   });
 
-  btnDraw.addEventListener("click", () => drawCard());
+  if (btnDraw) btnDraw.addEventListener("click", () => drawCard());
+
+  // Deck tap/keyboard is the primary draw action for humans
+  deckPile.addEventListener("click", async () => {
+    const p = currentPlayer();
+    const humanTurn = (state.status === "playing" && p && !p.isCPU);
+    if (!humanTurn || state.deck.length <= 0 || state.animLock) return;
+    await drawCard();
+  });
+  deckPile.addEventListener("keydown", async (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    const p = currentPlayer();
+    const humanTurn = (state.status === "playing" && p && !p.isCPU);
+    if (!humanTurn || state.deck.length <= 0 || state.animLock) return;
+    await drawCard();
+  });
   btnStash.addEventListener("click", () => stashAndEndTurn());
   btnEnd.addEventListener("click", () => endGame(true));
 
@@ -1216,4 +1470,5 @@
 </script>
 </body>
 </html>
+
 
